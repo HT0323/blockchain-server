@@ -32,6 +32,7 @@ def get_chain():
 @app.post("/transaction_pool")
 def post_transaction_pool(transaction: Transaction):
     blockchain.add_transaction_pool(transaction)
+    blockchain.broadcast_transaction(transaction)
     return {"message": "Transaction is posted."}
 
 
@@ -40,3 +41,10 @@ def post_transaction_pool(transaction: Transaction):
 def create_block(creator: str):
     blockchain.create_new_block(creator)
     return {"message": "New Block is Created."}
+
+
+# トランザクションのブロードキャストの受信
+@app.post("/receive_transaction")
+def receive_transaction(transaction: Transaction):
+    blockchain.add_transaction_pool(transaction)
+    return {"message": "Broadcast Transaction is success."}
