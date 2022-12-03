@@ -3,11 +3,25 @@ from fastapi import FastAPI
 app = FastAPI()
 
 
-@app.get("/")
-def index():
-    return {"Hello": "Japan"}
+# トランザクションプール情報を返却
+@app.get("/transaction_pool")
+def get_transaction():
+    pass
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int):
-    return {"item_id": item_id}
+# チェーン情報を返却
+@app.get("/chain")
+def get_chain():
+    pass
+
+
+# トランザクションをトランザクションプール情報に追加
+@app.post("/transaction_pool")
+def post_transaction_pool():
+    pass
+
+
+# ブロック生成
+@app.get("/create_block")
+def create_block():
+    pass
