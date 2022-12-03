@@ -14,7 +14,7 @@ def get_transaction():
 # チェーン情報を返却
 @app.get("/chain")
 def get_chain():
-    pass
+    return blockchain.chain
 
 
 # トランザクションをトランザクションプール情報に追加
