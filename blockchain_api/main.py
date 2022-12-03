@@ -36,6 +36,7 @@ def post_transaction_pool(transaction: Transaction):
 
 
 # ブロック生成
-@app.get("/create_block")
-def create_block():
-    pass
+@app.get("/create_block/{creator}")
+def create_block(creator: str):
+    blockchain.create_new_block(creator)
+    return {"message": "New Block is Created."}
