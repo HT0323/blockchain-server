@@ -1,5 +1,16 @@
 from fastapi import FastAPI
 import blockchain
+from pydantic import BaseModel
+
+
+class Transaction(BaseModel):
+    time: str
+    sender: str
+    receiver: str
+    amount: int
+    description: str
+    signature: str
+
 
 blockchain = blockchain.BlockChain()
 app = FastAPI()
@@ -19,8 +30,9 @@ def get_chain():
 
 # トランザクションをトランザクションプール情報に追加
 @app.post("/transaction_pool")
-def post_transaction_pool():
-    pass
+def post_transaction_pool(transaction: Transaction):
+    blockchain.add_transaction_pool(transaction)
+    return {"message": "Transaction is posted."}
 
 
 # ブロック生成
