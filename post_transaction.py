@@ -15,7 +15,7 @@ def main():
         "signature": "sample",
     }
 
-    url = "http://127.0.0.1:8002/transaction_pool/"
+    url = "https://1gf72q.deta.dev/transaction_pool/"
     # url = "https://s3c4k7.deta.dev/transaction_pool/"
     res = requests.post(url, json.dumps(transaction))
 

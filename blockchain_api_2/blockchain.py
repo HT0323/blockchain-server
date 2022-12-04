@@ -4,7 +4,8 @@ import json
 import api_list
 
 REWORD_AMOUNT = 999
-OTHER_API_LIST = api_list.API_LIST
+OTHER_API_LIST = api_list.PRD_API_LIST
+# OTHER_API_LIST = api_list.API_LIST
 
 
 class BlockChain(object):
