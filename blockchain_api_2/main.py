@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import blockchain
 from pydantic import BaseModel
+from typing import List
 
 
 class Transaction(BaseModel):
@@ -10,6 +11,17 @@ class Transaction(BaseModel):
     amount: int
     description: str
     signature: str
+
+
+class Block(BaseModel):
+    time: str
+    transactions: List[Transaction]
+    hash: str
+    nonce: int
+
+
+class Chain(BaseModel):
+    blocks: List[Block]
 
 
 blockchain = blockchain.BlockChain()
@@ -40,6 +52,7 @@ def post_transaction_pool(transaction: Transaction):
 @app.get("/create_block/{creator}")
 def create_block(creator: str):
     blockchain.create_new_block(creator)
+    blockchain.broadcast_chain(blockchain.chain)
     return {"message": "New Block is Created."}
 
 
@@ -48,3 +61,10 @@ def create_block(creator: str):
 def receive_transaction(transaction: Transaction):
     blockchain.add_transaction_pool(transaction)
     return {"message": "Broadcast Transaction is success."}
+
+
+# ブロックがチェーン追加時ののブロードキャストの受信
+@app.post("/receive_chain")
+def receive_chain(chain: Chain):
+    blockchain.replace_chain(chain)
+    return {"message": "Broadcast Chain is success."}

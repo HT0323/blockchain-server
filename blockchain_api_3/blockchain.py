@@ -53,3 +53,15 @@ class BlockChain(object):
                 url + "/receive_transaction", json.dumps(transaction_dict)
             )
             print(res.json())
+
+    # チェーンにブロックが追加された際に他のサーバーに転送
+    def broadcast_chain(self, chain):
+        for url in OTHER_API_LIST:
+            res = requests.post(url + "/receive_chain", json.dumps(chain))
+            print(res.json())
+
+    # 　　ブロードキャストの際に　chainを更新し、トランザクションプールを初期化
+    def replace_chain(self, chain):
+        chain_dict = chain.dict()
+        self.chain = chain_dict
+        self.transaction_pool["transactions"] = []
