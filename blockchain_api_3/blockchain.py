@@ -6,6 +6,7 @@ import api_list
 from ecdsa import VerifyingKey
 from ecdsa import SECP256k1
 import binascii
+import hashlib
 
 REWORD_AMOUNT = 999
 # OTHER_API_LIST = api_list.PRD_API_LIST
@@ -16,6 +17,14 @@ class BlockChain(object):
     def __init__(self):
         self.transaction_pool = {"transactions": []}
         self.chain = {"blocks": []}
+
+        self.first_block = {
+            "time": "00000000T00:00:00.000000",
+            "transactions": [],
+            "hash": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "nonce": 0,
+        }
+        self.chain["blocks"].append(self.first_block)
 
     # トランザクションプールにトランザクションを追加
     def add_transaction_pool(self, transaction):
@@ -39,10 +48,12 @@ class BlockChain(object):
         transactions.append(reword_transaction_dict)
 
         # ブロック生成
+        last_block_dict = self.chain["blocks"][-1]
+        hash = self.hash(last_block_dict)
         block = {
             "time": datetime.datetime.now().isoformat(),
             "transactions": transactions,
-            "hash": "hash_sample",
+            "hash": hash,
             "nonce": 0,
         }
 
@@ -90,3 +101,10 @@ class BlockChain(object):
         transaction_unsigned_bytes = bytes(transaction_unsigned_json, encoding="utf-8")
 
         return public_key.verify(signature, transaction_unsigned_bytes)
+
+    # ブロックをHash化
+    def hash(self, block_dict):
+        block_json = json.dumps(block_dict)
+        block_byte = bytes(block_json, encoding="utf-8")
+        hash = hashlib.sha256(block_byte).hexdigest()
+        return hash
