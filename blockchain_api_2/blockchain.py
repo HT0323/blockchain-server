@@ -3,9 +3,13 @@ import requests
 import json
 import api_list
 
+from ecdsa import VerifyingKey
+from ecdsa import SECP256k1
+import binascii
+
 REWORD_AMOUNT = 999
-OTHER_API_LIST = api_list.PRD_API_LIST
-# OTHER_API_LIST = api_list.API_LIST
+# OTHER_API_LIST = api_list.PRD_API_LIST
+OTHER_API_LIST = api_list.DEV_API_LIST
 
 
 class BlockChain(object):
@@ -66,3 +70,23 @@ class BlockChain(object):
         chain_dict = chain.dict()
         self.chain = chain_dict
         self.transaction_pool["transactions"] = []
+
+    # トランザクションの検証
+    def verify_transaction(self, transaction):
+        public_key = VerifyingKey.from_string(
+            binascii.unhexlify(transaction.sender), curve=SECP256k1
+        )
+        signature = binascii.unhexlify(transaction.signature)
+
+        transaction_unsigned = {
+            "time": transaction.time,
+            "sender": transaction.sender,
+            "receiver": transaction.receiver,
+            "amount": transaction.amount,
+            "description": transaction.description,
+        }
+
+        transaction_unsigned_json = json.dumps(transaction_unsigned)
+        transaction_unsigned_bytes = bytes(transaction_unsigned_json, encoding="utf-8")
+
+        return public_key.verify(signature, transaction_unsigned_bytes)
