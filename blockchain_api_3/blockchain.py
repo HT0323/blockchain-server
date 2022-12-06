@@ -11,6 +11,7 @@ import hashlib
 REWORD_AMOUNT = 999
 # OTHER_API_LIST = api_list.PRD_API_LIST
 OTHER_API_LIST = api_list.DEV_API_LIST
+PROOF_OF_WORK_DIFFICULTY = 4
 
 
 class BlockChain(object):
@@ -50,16 +51,27 @@ class BlockChain(object):
         # ブロック生成
         last_block_dict = self.chain["blocks"][-1]
         hash = self.hash(last_block_dict)
+
+        block_without_time = {"transactions": transactions, "hash": hash, "nonce": 0}
+
+        while (
+            not self.hash(block_without_time)[:PROOF_OF_WORK_DIFFICULTY]
+            == "0" * PROOF_OF_WORK_DIFFICULTY
+        ):
+            block_without_time["nonce"] += 1
+
         block = {
             "time": datetime.datetime.now().isoformat(),
-            "transactions": transactions,
-            "hash": hash,
-            "nonce": 0,
+            "transactions": block_without_time["transactions"],
+            "hash": block_without_time["hash"],
+            "nonce": block_without_time["nonce"],
         }
 
         # 生成したブロックをチェーンに追加してトランザクションプールを初期化
         self.chain["blocks"].append(block)
-        self.transaction_pool["transactions"] = []
+        for transaction in block["transactions"]:
+            if transaction in self.transaction_pool["transactions"]:
+                self.transaction_pool["transactions"].remove(transaction)
 
     # トランザクションが追加された際に他のサーバーに転送
     def broadcast_transaction(self, transaction):
@@ -80,7 +92,11 @@ class BlockChain(object):
     def replace_chain(self, chain):
         chain_dict = chain.dict()
         self.chain = chain_dict
-        self.transaction_pool["transactions"] = []
+
+        latest_block_transactions = chain_dict["blocks"][-1]["transactions"]
+        for transaction in latest_block_transactions:
+            if transaction in self.transaction_pool["transactions"]:
+                self.transaction_pool["transactions"].remove(transaction)
 
     # トランザクションの検証
     def verify_transaction(self, transaction):
