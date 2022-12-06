@@ -124,3 +124,43 @@ class BlockChain(object):
         block_byte = bytes(block_json, encoding="utf-8")
         hash = hashlib.sha256(block_byte).hexdigest()
         return hash
+
+    #  受け取ったチェーンを検証
+    def verify_chain(self, chain):
+        chain_dict = chain.dict()
+
+        if len(chain_dict["blocks"]) <= len(self.chain["blocks"]):
+            return False
+
+        for i in range(len(chain_dict["blocks"])):
+            block = chain_dict["blocks"][i]
+            previous_block = chain_dict["blocks"][i - 1]
+
+            if i == 0:
+                if block != self.first_block:
+                    return False
+            else:
+                # hash値前のブロックのハッシュ値が一致するか
+                if block["hash"] != self.hash(previous_block):
+                    return False
+
+                # PROOF_OF_WORKの検証
+                block_without_time = {
+                    "transactions": block["transactions"],
+                    "hash": block["hash"],
+                    "nonce": block["nonce"],
+                }
+                if (
+                    self.hash(block_without_time)[:PROOF_OF_WORK_DIFFICULTY]
+                    != "0" * PROOF_OF_WORK_DIFFICULTY
+                ):
+                    return False
+
+        # リワードのトランザクションが正常か
+        reword_transaction = chain_dict["blocks"][-1]["transactions"][-1]
+        if reword_transaction["sender"] != "Blockchain":
+            return False
+        if reword_transaction["amount"] != REWORD_AMOUNT:
+            return False
+
+        return True

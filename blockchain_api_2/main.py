@@ -68,5 +68,6 @@ def receive_transaction(transaction: Transaction):
 # ブロックがチェーン追加時ののブロードキャストの受信
 @app.post("/receive_chain")
 def receive_chain(chain: Chain):
-    blockchain.replace_chain(chain)
-    return {"message": "Broadcast Chain is success."}
+    if blockchain.verify_chain(chain):
+        blockchain.replace_chain(chain)
+        return {"message": "Broadcast Chain is success."}
